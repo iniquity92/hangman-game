@@ -1,0 +1,303 @@
+import random
+#imported the random module from the library
+dictionary={"computer":["internet","server","graph","algorithms","quicksort","compiler","asymptotic","assembler","software","hardware",],
+            "biology":["anatomy","bacteria","ribosome","mitochondria","fascia","skeleton","glycolytic","cell","respiration","digestion",],}
+#created a dictionary of words to play with
+hangman_states={1:
+                '''\
+                     +------+
+                            |
+                            |
+                            |
+                            |
+                            |
+                            |
+                            |
+                         ========
+                         ''',
+                    2:
+                '''\
+                     +------+
+                     |      |
+                            |
+                            |
+                            |
+                            |
+                            |
+                            |
+                        =========
+                        ''',
+                    3:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                            |
+                            |
+                            |
+                            |
+                            |
+                        =========
+                        ''',
+                    4:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                     |      |
+                            |
+                            |
+                            |
+                            |
+                        =========
+                        ''',
+                    5:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                     |      |
+                    /       |
+                            |
+                            |
+                            |
+                        =========
+                        ''',
+                    6:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                     |      |
+                    / \     |
+                            |
+                            |
+                            |
+                        =========
+                        ''',
+                    7:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                     |      |
+                    /|\     |
+                            |
+                            |
+                            |
+                        =========
+                        ''',
+                    8:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                     |      |
+                    /|\     |
+                    /       |
+                            |
+                            |
+                        =========
+                        ''',
+                    9:
+                '''\
+                     +------+
+                     |      |
+                     o      |
+                     |      |
+                    /|\     |
+                    / \     |
+                            |
+                            |
+                        =========
+                        ''',}
+#created a state based dictionary for the hangman figure
+#as you keep missing the correct word, the figure will
+#complete itself
+
+miss_count = 1
+#a global variable, which will increment every time the
+#player misses the correct word
+#this is used to access the hangman states from the
+#hangman_states dictionary
+
+already_guessed_alphabets=[]
+#this list keeps a tab of alphabets that the player has
+#already guessed, further documentation in the function
+
+def find_indices_of_alphabet_in(userinput,phantom_word):
+    indices=[]
+    pos=0
+    for i in phantom_word:
+        
+        if i is userinput:
+            indices.append(pos)
+        pos+=1
+    return indices
+#this function takes in the idividual alphabets that the
+#palyer will enter, it also recieves the phantom_word picked
+#from the dictionary above, then it matches the positions
+#where the userinput occur in the phantom_word
+#if userinput occur in phantom_word, the for loop will
+#generate a list of positions and return the same to the
+#calling function
+#if userinput is not in phantom_word, the function returns an
+#empty list.
+#this function can be improved further by checking if userinput
+#occurs in phantom_word or not by using "if userinput in phantom_word"
+#before running the loop
+            
+def draw_hangman_playboard(guess_word):
+    global miss_count
+    print(hangman_states[miss_count])
+    print(guess_word)
+    if  miss_count==9:
+        print("Game over")
+        return False
+    return True
+#this function allows to create the playarea of the game.
+#it takes in the guess_word (complete/incomplete) and uses
+#the globaly defined miss_count variable to create the
+#hangman figures on the screen, as well as it prints the
+#guess_word too so the player sees his progress
+
+def hangman_word_verify(userinput,phantom_word):
+    if type(userinput).__name__=='list':
+        temp = "".join(str(x) for x in userinput)
+        userinput = str(temp)
+        
+    if userinput == phantom_word:
+        return True
+    else:
+        return False
+
+#this function verifies at every userinput whether the given
+#userinput completes the word that the user is guessing or if
+#the userinput is the phantom_word. the function accepts list
+#from function hangman_alphabet_check as well as the string from
+#the main of the game. the function constructs a string out of
+#the list and proceeds to determine if the player has guessed
+#the word or not.
+
+    
+def hangman_alphabet_check(guess_word,userinput,phantom_word):
+    global already_guessed_alphabets
+    global miss_count
+    garbage=[]
+    try:
+        already_guessed_alphabets.index(userinput)
+
+    except ValueError:
+        already_guessed_alphabets.append(userinput)
+        indices=find_indices_of_alphabet_in(userinput,phantom_word)
+        if len(indices)>0:
+            for i in indices:
+                garbage.append(guess_word.pop(i))
+                guess_word.insert(i,userinput)
+
+            garbage.clear()    
+            return guess_word
+        else:
+            print("the alphabet does not occur in the word, please try again")
+            miss_count+=1
+            return guess_word
+            
+
+    print("you have already given this input, please try again")
+    userinput=input()
+    hangman_alphabet_check(guess_word,userinput,phantom_word)
+    return guess_word
+    
+#this function takes the parially complete guess_word,userinput
+#and phantom_word as arguments, it uses the
+#already_guessed_alphabets list to check if a certain alphabet
+#has been already used by the palyer or not inside the try block.
+#the try block raises a ValueError exception if the alphabet is
+#new. in that cases in the except block it first appends the alphabet
+#to the list and then uses the find_indices... function to find
+#the positions where userinput occurs in the phantom_word, based
+#on the list returned, we insert the userinput in those positions
+#in guess_word. since list.insert inserts the element and shifts the
+#entire list to accomodate the new element, we used a garbage list,
+#in which we first pop out an element from the guess_word from the desired
+#position and then we insert the element on its place. If an empty
+#list is returned the function increments the miss_count variable.
+#if the try block does not raise an error that means the alphabet
+#has already been guessed and the function prompts the user to enter
+#a new choice and recurses.
+    
+if __name__=='__main__':
+    playing='yes'
+       
+    while playing=='yes':
+        already_guessed_alphabets.clear()
+        miss_count=1
+        print("Welcome to hangman, be smart and don't get yourself killed")
+        print("press enter when you're ready")
+        input()
+        print("Choose your favourite topic")
+        print("computer or biology")
+        topic = str(input())
+        phantom_word = dictionary[topic][random.randint(0,10)]
+        guess_word=len(phantom_word)*[[],]
+
+        drawboard_state=True
+
+        while drawboard_state==True: 
+            drawboard_state=draw_hangman_playboard(guess_word)
+
+            if not drawboard_state:
+                break
+
+            print("enter your guess, you can enter the complete word or guess a letter")
+            userinput = str(input())
+            
+            if len(userinput)>1 and len(userinput)<len(phantom_word):
+                print("invalid input, please try again")
+                miss_count= miss_count+1
+                continue
+
+            else:
+                if len(userinput)==len(phantom_word):
+
+                    word_verify_state=hangman_word_verify(userinput,phantom_word)
+
+                    if word_verify_state:
+                        print("Congratulations, you guessed the right word ")
+                        print(phantom_word)
+                        break
+
+                    else:
+                        miss_count=miss_count+1
+                        continue
+
+                elif len(userinput)==1:
+
+                    guess_word = hangman_alphabet_check(guess_word,userinput,phantom_word)
+                    word_verify_state=hangman_word_verify(guess_word,phantom_word)
+
+                    if word_verify_state:
+                        print("Congratulations, you guessed the right word ")
+                        print(phantom_word)
+                        break
+            
+                    else:
+                        continue
+
+        
+        print("Play Again? Enter yes? Enter no to end the game")
+        playing=str(input())
+
+    if playing=='no':
+      print("Thank you for playing hangman :)")
+
+    
+        
+        
+        
+    
+      
+    
+    
+                      
+                            
